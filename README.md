@@ -29,8 +29,9 @@ $r = \frac{F_s^{\text{out}}}{F_s^{\text{in}}} = \frac{p}{q} \quad \text{(reduced
 $z[k] = \sum_{m} h[m]\; y[kq - m], \qquad k \in \mathbb{Z}.$
 
 **Quantization to interleaved IQ (u8).**
-$q_I = \operatorname{clip}\Big((\operatorname{Re}\{z\}/g + 1)\cdot 127.5,\; 0,\; 255\Big),$
-with the same mapping for $q_Q$. The gain $g$ is either the observed global peak (auto) or a fixed scalar, ensuring amplitude is compressed without wraparound.
+$q_I = \text{clip}\big((\Re\{z\}/g + 1)\cdot 127.5,\; 0,\; 255\big), \qquad
+q_Q = \text{clip}\big((\Im\{z\}/g + 1)\cdot 127.5,\; 0,\; 255\big).$
+The gain $g$ sets the full-scale reference: auto mode picks $g \approx 1.05 \max_k |z[k]|$ (headroom against peaks), while a fixed $g$ enforces deterministic scaling across runs. Geometrically, this projects $z$ onto the cube $[-g, g]^2$, translates to $[0,255]^2$, and rounds to the nearest lattice point, producing uniform quantization noise with step size $\Delta \approx 1/127.5$ of the normalized amplitude.
 
 > [!NOTE]
 > If `use_hilbert: false`, the pipeline skips analytic construction and treats the input as $I$-only, which alters image rejection and spectral symmetry assumptions.
