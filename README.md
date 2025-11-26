@@ -1,7 +1,7 @@
-# GPS SDR Workspace — DSP Pipeline Report
+# GPS SDR DSP Pipeline
 
 <div align="center">
-  <img src="logo/logo.svg" alt="GPS SDR Pipeline Logo" width="240">
+  <img src="logo/logo.svg" alt="GPS SDR Pipeline Logo" width="480">
 </div>
 
 This document serves as a technical article for the offline GPS spoofing-to-IQ pipeline. It highlights the mathematical signal processing steps, reproducible commands, and verification hooks that bridge raw captures to `annappo/GPS-SDR-Receiver`.
@@ -20,9 +20,7 @@ Let
 **Analytic extension.** The Hilbert transform $\mathcal{H}\{\cdot\}$ produces $a[n] = s[n] + j\,\hat{s}[n]$, suppressing negative frequencies so that a single-sided spectrum can be rotated cleanly.
 
 **Numerically controlled oscillator (NCO).**
-$$
-u[n] = e^{-j 2\pi \Delta f n / F_s^{\text{in}}}, \qquad y[n] = a[n]\,u[n].
-$$
+$$u[n] = e^{-j 2\pi \Delta f n / F_s^{\text{in}}}, \qquad y[n] = a[n]\,u[n].$$
 This shifts the spectral peak from $f_c$ to $f_t$, sending GPS L1 content to baseband.
 
 **Polyphase resampling.** Let the rate ratio be
