@@ -12,6 +12,24 @@ This document serves as a technical article for the offline GPS spoofing-to-IQ p
 - **Quantization fidelity:** uniform scalar quantization with step $\Delta \approx 1/127.5$ yields peak SNR $\approx 6.02N + 1.76$ dB for $N=8$ bits, assuming full-scale drive; auto gain keeps the signal within this regime.
 - **Phase coherence:** continuous NCO phasing across chunks preserves $\phi_{n+1} = \phi_n + \omega_0 N_{\text{chunk}}$ (with $\omega_0 = 2\pi \Delta f / F_s^{\text{in}}$), eliminating inter-chunk discontinuities that would otherwise manifest as spectral stitching.
 
+**Symbol table.**
+
+| Symbol | Meaning |
+| :--- | :--- |
+| $x[n]$ | Raw ADC real-valued samples (8-bit) |
+| $s[n]$ | Normalized real stream $x[n]/128$ |
+| $a[n]$ | Analytic signal $s[n] + j\,\hat{s}[n]$ |
+| $f_c,\; f_t$ | Capture center and GPS L1 target centers |
+| $\Delta f$ | Frequency shift $f_t - f_c$ |
+| $F_s^{\text{in}},\; F_s^{\text{out}}$ | Input and output sample rates |
+| $r = p/q$ | Reduced resampling ratio $F_s^{\text{out}}/F_s^{\text{in}}$ |
+| $h[m]$ | Polyphase low-pass prototype taps |
+| $z[k]$ | Post-resample complex envelope |
+| $g$ | IQ full-scale gain (auto or fixed) |
+| $\Delta$ | Quantizer step $\approx 1/127.5$ after scaling |
+| $\omega_0$ | NCO radian step $2\pi \Delta f / F_s^{\text{in}}$ |
+| $\phi_n$ | NCO phase accumulator at sample $n$ |
+
 ---
 
 ## 1. Signals, Notation, and Data Model
@@ -101,6 +119,28 @@ Key paths
 
 > [!TIP]
 > For spectral fidelity, increase `chunk_size` to reduce Hilbert edge effects and ensure the resampler’s transition band stays narrow relative to the downsampled Nyquist zone.
+
+---
+
+## 3.1 Notebook-Derived Analyses (Spectrogram and PSD)
+
+The companion notebooks implement an STFT-based spectrogram with Doppler overlays:
+
+- **STFT grid:** $Z_{f,t} = \text{STFT}\{x\}(f,t)$ computed with $N_{\text{seg}}$-point windows and overlap $N_{\text{ovl}}$, producing
+  $$
+  P_{f,t} = 20 \log_{10} \big( |Z_{f,t}| + \epsilon \big)
+  $$
+  for numerical floor $\epsilon$.
+- **Frequency shift for plotting:** $f$-bins are fftshifted to $[-F_s/2,\, F_s/2]$ so Doppler lines appear centered at 0 Hz after downconversion.
+- **Doppler overlays:** For each acquired PRN with Doppler $\nu_{\text{doppler}}$, the notebook draws $f = \nu_{\text{doppler}}$ horizontal guides on the STFT heatmap to visually align correlation peaks with spectral energy.
+- **Welch PSD (iq_comparison):** Using segment length $L$ and overlap $\alpha L$, the PSD estimator averages periodograms to reduce variance, reporting
+  $$
+  S_{xx}(f) = \frac{1}{K} \sum_{k=1}^{K} \frac{1}{L} \left| \sum_{n=0}^{L-1} w[n]\, x_k[n]\, e^{-j 2\pi f n / F_s} \right|^2,
+  $$
+  where $w[n]$ is the window and $K$ the number of segments.
+- **Histogram/constellation diagnostics:** The notebook compares empirical amplitude CDFs, IQ histograms, and constellations across captures to detect gain/linearity issues or DC offset.
+
+These analyses mirror the runtime DSP: they assume the same $F_s^{\text{out}}$ and normalization used in `scripts/convert_dat_to_bin.py`, ensuring that visual diagnostics are aligned with the processed IQ scale.
 
 ---
 
