@@ -1,0 +1,23 @@
+[2025-11-10T22:52:00.000] [convert] Starting conversion: /home/ismail/TGS_L1_E1.dat -> /home/ismail/gps_sdr_workspace/data/processed/TGS_L1_E1_2p048Msps_iq_u8.bin
+[2025-11-10T23:15:12.000] [convert] Starting conversion: /home/ismail/gps_sdr_workspace/data/raw/TGS_L1_E1.dat -> /home/ismail/gps_sdr_workspace/data/processed/TGS_L1_E1_2p048Msps_iq_u8.bin
+[2025-11-10T23:20:32.000] [convert] Starting conversion: /home/ismail/gps_sdr_workspace/data/raw/TGS_L1_E1.dat -> /home/ismail/gps_sdr_workspace/data/processed/TGS_L1_E1_2p048Msps_iq_u8.bin
+[2025-11-10T23:23:44.000] [convert] Starting conversion: /home/ismail/gps_sdr_workspace/data/raw/TGS_L1_E1.dat -> /home/ismail/gps_sdr_workspace/data/processed/TGS_L1_E1_2p048Msps_iq_u8.bin
+[2025-11-10T23:27:02.000] [convert] Starting conversion: /home/ismail/gps_sdr_workspace/data/raw/TGS_L1_E1.dat -> /home/ismail/gps_sdr_workspace/data/processed/TGS_L1_E1_2p048Msps_iq_u8.bin
+[2025-11-10T23:54:55.000] [convert] Starting conversion: /home/ismail/gps_sdr_workspace/data/raw/TGS_L1_E1.dat -> /home/ismail/gps_sdr_workspace/data/processed/TGS_L1_E1_2p048Msps_iq_u8.bin
+[2025-11-11T00:34:31.000] [convert] Wrote metadata to /home/ismail/gps_sdr_workspace/data/processed/TGS_L1_E1_2p048Msps_iq_u8.bin.json
+[2025-11-11T00:34:31.000] [convert] Completed conversion. Samples in 10115612672, out 796799090
+[2025-11-11T01:29:34.000] [convert] Starting conversion: /home/ismail/gps_sdr_workspace/data/raw/TGS_L1_E1.dat -> /home/ismail/gps_sdr_workspace/data/processed/TGS_L1_E1_2p048Msps_iq_u8.bin
+[2025-11-11T01:43:37.000] [convert] Starting conversion: /home/ismail/gps_sdr_workspace/data/raw/TGS_L1_E1.dat -> /home/ismail/gps_sdr_workspace/data/processed/TGS_L1_E1_2p048Msps_iq_u8.bin
+[2025-11-11T02:23:07.000] [convert] Starting conversion: /home/ismail/gps_sdr_workspace/data/raw/TGS_L1_E1.dat -> /home/ismail/gps_sdr_workspace/data/processed/TGS_L1_E1_2p048Msps_iq_u8.bin
+[2025-11-11T03:30:30.000] [convert] Configured input /home/lenovo/gps/data/raw/TGS_L1_E1.dat missing; falling back to /home/lenovo/gps/data/raw/TGS_L1_E1-002.dat
+[2025-11-11T03:30:30.000] [convert] Starting conversion: /home/lenovo/gps/data/raw/TGS_L1_E1-002.dat -> /home/lenovo/gps/data/processed/TGS_L1_E1_2p048Msps_iq_u8.bin
+[2025-11-11T03:32:37.000] [convert] Configured input /home/lenovo/gps/data/raw/TGS_L1_E1.dat missing; falling back to /home/lenovo/gps/data/raw/TGS_L1_E1-002.dat
+[2025-11-11T03:32:37.000] [convert] Starting conversion: /home/lenovo/gps/data/raw/TGS_L1_E1-002.dat -> /home/lenovo/gps/data/processed/TGS_L1_E1_2p048Msps_iq_u8.bin
+[2025-11-11T03:42:46.000] [convert] Configured input /home/lenovo/gps/data/raw/TGS_L1_E1.dat missing; falling back to /home/lenovo/gps/data/raw/TGS_L1_E1-002.dat
+[2025-11-11T03:42:46.000] [convert] Starting conversion: /home/lenovo/gps/data/raw/TGS_L1_E1-002.dat -> /home/lenovo/gps/data/processed/TGS_L1_E1_2p048Msps_iq_u8.bin
+[2025-11-11T03:52:08.000] [convert] Configured input /home/lenovo/gps/data/raw/TGS_L1_E1.dat missing; falling back to /home/lenovo/gps/data/raw/TGS_L1_E1-002.dat
+[2025-11-11T03:52:08.000] [convert] Starting conversion: /home/lenovo/gps/data/raw/TGS_L1_E1-002.dat -> /home/lenovo/gps/data/processed/TGS_L1_E1_2p048Msps_iq_u8.bin
+[2025-11-11T03:53:15.000] [convert] Configured input /home/lenovo/gps/data/raw/TGS_L1_E1.dat missing; falling back to /home/lenovo/gps/data/raw/TGS_L1_E1-002.dat
+[2025-11-11T03:53:15.000] [convert] Starting conversion: /home/lenovo/gps/data/raw/TGS_L1_E1-002.dat -> /home/lenovo/gps/data/processed/TGS_L1_E1_2p048Msps_iq_u8.bin
+[2025-11-11T11:54:41.000] [convert] Wrote metadata to /home/lenovo/gps/data/processed/TGS_L1_E1_2p048Msps_iq_u8.bin.json
+[2025-11-11T11:54:41.000] [convert] Completed conversion. Samples in 10115612672, out 796799090

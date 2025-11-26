@@ -1,0 +1,5 @@
+# SHA-256 manifest for downloaded datasets.
+# Format: <filename> <sha256>
+# Update these entries when new official hashes become available.
+TGS_L1_E1-002.dat 531378bea6caf0bcae63f0489f90df574550d60f2ac0be1c258fd337121a381c
+230914_data_90s.bin 4626badbb5dbe528b9950846873f7e0302f23ea713a9b33192b32b494eb47d28

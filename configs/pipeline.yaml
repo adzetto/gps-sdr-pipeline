@@ -1,0 +1,18 @@
+# Processing configuration for TGS_L1_E1.dat conversion pipeline
+signal:
+  input_path: data/raw/TGS_L1_E1.dat
+  output_path: data/processed/TGS_L1_E1_2p048Msps_iq_u8.bin
+  interim_path: data/interim/TGS_L1_E1_complex64.tmp
+  center_freq_hz: 1569030000
+  target_center_hz: 1575420000
+  fs_in: 26000000
+  fs_out: 2048000
+  quantization: u8  # valid: u8, i8
+  iq_gain: auto
+  chunk_size: 67108864  # 64 MiB
+  dtype: int8  # Raw capture ships as signed 8-bit real samples
+runtime:
+  plots_dir: plots
+  logs_dir: logs
+  enable_histograms: true
+  histogram_samples: 2097152

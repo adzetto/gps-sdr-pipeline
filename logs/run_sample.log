@@ -1,0 +1,24 @@
+GPS evaluation started (PID 491841)
+GPS receiver started (PID 491842)
+This plugin does not support propagateSizeHints()
+This plugin does not support raise()
+This plugin does not support raise()
+EXCEPTION IN (/home/ismail/gps_sdr_workspace/external/GPS-SDR-Receiver/src/gpseval.py, LINE 483 "sockUDP.bind((UDP_ALL, UDP_PORT))  # binding is for receiving messages"): [Errno 98] Address already in use
+Found Satellites:
+PRN 12 Corr:18.0  f=+1600.0
+PRN 15 Corr:16.7  f=-4200.0
+PRN 19 Corr:15.7  f= -400.0
+PRN 32 Corr:13.9  f=+2600.0
+PRN 10 Corr:13.9  f=-1400.0
+PRN 23 Corr:13.7  f=-3400.0
+PRN 24 Corr:13.4  f=-1000.0
+PRN 25 Corr:11.1  f=+2800.0
+PRN 17 Corr:11.1  f=-2600.0
+PRN 13 Corr:10.6  f=-4800.0
+PRN 22 Corr:10.4  f=-4000.0
+
+Pool closed
+Task2 finished
+EOF
+Task1 finished
+29.9254412651062
