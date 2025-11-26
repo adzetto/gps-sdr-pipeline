@@ -20,26 +20,25 @@ Let
 **Analytic extension.** The Hilbert transform $\mathcal{H}\{\cdot\}$ produces $a[n] = s[n] + j\,\hat{s}[n]$, suppressing negative frequencies so that a single-sided spectrum can be rotated cleanly.
 
 **Numerically controlled oscillator (NCO).**
-$$u[n] = e^{-j 2\pi \Delta f n / F_s^{\text{in}}}, \qquad y[n] = a[n]\,u[n].$$
+$u[n] = e^{-j 2\pi \Delta f n / F_s^{\text{in}}}, \qquad y[n] = a[n]\,u[n].$
 This shifts the spectral peak from $f_c$ to $f_t$, sending GPS L1 content to baseband.
 
 **Polyphase resampling.** Let the rate ratio be
-$$
-r = \frac{F_s^{\text{out}}}{F_s^{\text{in}}} = \frac{p}{q} \quad \text{(reduced by gcd)}.
-$$
+$r = \frac{F_s^{\text{out}}}{F_s^{\text{in}}} = \frac{p}{q} \quad \text{(reduced by gcd)}.$
 `resample_poly` realizes a finite-impulse-response low-pass $h[m]$ with at least 60 dB stopband, applied as
-$$
-z[k] = \sum_{m} h[m]\; y[kq - m], \qquad k \in \mathbb{Z}.
-$$
+$z[k] = \sum_{m} h[m]\; y[kq - m], \qquad k \in \mathbb{Z}.$
 
 **Quantization to interleaved IQ (u8).**
-$$
-q_I = \operatorname{clip}\Big((\operatorname{Re}\{z\}/g + 1)\cdot 127.5,\; 0,\; 255\Big),
-$$
+$q_I = \operatorname{clip}\Big((\operatorname{Re}\{z\}/g + 1)\cdot 127.5,\; 0,\; 255\Big),$
 with the same mapping for $q_Q$. The gain $g$ is either the observed global peak (auto) or a fixed scalar, ensuring amplitude is compressed without wraparound.
 
 > [!NOTE]
 > If `use_hilbert: false`, the pipeline skips analytic construction and treats the input as $I$-only, which alters image rejection and spectral symmetry assumptions.
+> 
+> Without an analytic extension, the spectrum is conjugate-symmetric and any frequency shift by $\Delta f$ produces mirror terms at $\pm \Delta f$. Expect image leakage unless the downstream receiver explicitly suppresses the mirrored band.
+>
+> [!TIP]
+> Keep `use_hilbert: true` for real-valued captures so that the NCO shift acts on a single-sided spectrum; this preserves the textbook modulation property $X(f - \Delta f)$ and prevents negative-frequency folding when decimating.
 
 ---
 
