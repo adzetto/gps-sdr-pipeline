@@ -1,7 +1,7 @@
 # GPS SDR Workspace — DSP Pipeline Report
 
 <div align="center">
-  <img src="logo/logo.svg" alt="GPS SDR Pipeline Logo" width="180">
+  <img src="logo/logo.svg" alt="GPS SDR Pipeline Logo" width="240">
 </div>
 
 This document serves as a technical article for the offline GPS spoofing-to-IQ pipeline. It highlights the mathematical signal processing steps, reproducible commands, and verification hooks that bridge raw captures to `annappo/GPS-SDR-Receiver`.
@@ -12,28 +12,36 @@ This document serves as a technical article for the offline GPS spoofing-to-IQ p
 
 Let
 
-- \(x[n] \in \mathbb{Z}_{8}\) be the **real-valued** ADC output sampled at \(F_s^{\text{in}} = 26\,\text{MS/s}\).
-- \(s[n] = x[n]/128\) be the normalized baseband in \([-1,1)\).
-- \(f_c = 1{,}569.03\,\text{MHz}\) (capture center) and \(f_t = 1{,}575.42\,\text{MHz}\) (GPS L1).
-- \(\Delta f = f_t - f_c\) and \(F_s^{\text{out}} \in \{2.048\,\text{MS/s}, 4.096\,\text{MS/s}\}\).
+- $x[n] \in \mathbb{Z}_{8}$ be the **real-valued** ADC output sampled at $F_s^{\text{in}} = 26\,\text{MS/s}$.
+- $s[n] = x[n] / 128$ be the normalized baseband in $[-1, 1)$.
+- $f_c = 1{,}569.03\,\text{MHz}$ (capture center) and $f_t = 1{,}575.42\,\text{MHz}$ (GPS L1).
+- $\Delta f = f_t - f_c$ and $F_s^{\text{out}} \in \{2.048\,\text{MS/s},\; 4.096\,\text{MS/s}\}$.
 
-We construct the analytic signal \(a[n] = \mathcal{H}\{s[n]\}\) via the discrete Hilbert transform \(\mathcal{H}\). Frequency translation uses an NCO:
-\[
-u[n] = e^{-j 2\pi \Delta f n / F_s^{\text{in}}}, \quad y[n] = a[n] \cdot u[n].
-\]
+**Analytic extension.** The Hilbert transform $\mathcal{H}\{\cdot\}$ produces $a[n] = s[n] + j\,\hat{s}[n]$, suppressing negative frequencies so that a single-sided spectrum can be rotated cleanly.
 
-Resampling with `resample_poly` forms
-\[
-z[k] = \text{LPF}\Big(y[n]\Big)\Big|_{k \cdot \frac{F_s^{\text{in}}}{F_s^{\text{out}}}},
-\]
-where the rational factor is reduced by `Fraction(Fs_out, Fs_in)` for minimal numerical drift and stopband attenuation ≥ 60 dB. Quantization maps interleaved \(I,Q\) to uint8:
-\[
-q_I = \text{clip}\Big(\big(\operatorname{Re}\{z\}/g + 1\big) \cdot 127.5,\,0,\,255\Big),
-\]
-with \(g\) chosen as either the global peak (auto) or a fixed gain.
+**Numerically controlled oscillator (NCO).**
+$$
+u[n] = e^{-j 2\pi \Delta f n / F_s^{\text{in}}}, \qquad y[n] = a[n]\,u[n].
+$$
+This shifts the spectral peak from $f_c$ to $f_t$, sending GPS L1 content to baseband.
+
+**Polyphase resampling.** Let the rate ratio be
+$$
+r = \frac{F_s^{\text{out}}}{F_s^{\text{in}}} = \frac{p}{q} \quad \text{(reduced by gcd)}.
+$$
+`resample_poly` realizes a finite-impulse-response low-pass $h[m]$ with at least 60 dB stopband, applied as
+$$
+z[k] = \sum_{m} h[m]\; y[kq - m], \qquad k \in \mathbb{Z}.
+$$
+
+**Quantization to interleaved IQ (u8).**
+$$
+q_I = \operatorname{clip}\Big((\operatorname{Re}\{z\}/g + 1)\cdot 127.5,\; 0,\; 255\Big),
+$$
+with the same mapping for $q_Q$. The gain $g$ is either the observed global peak (auto) or a fixed scalar, ensuring amplitude is compressed without wraparound.
 
 > [!NOTE]
-> If `use_hilbert: false`, the pipeline skips analytic construction and treats the input as \(I\)-only, which alters image rejection and spectral symmetry assumptions.
+> If `use_hilbert: false`, the pipeline skips analytic construction and treats the input as $I$-only, which alters image rejection and spectral symmetry assumptions.
 
 ---
 
@@ -64,26 +72,26 @@ Key paths
 <summary>DSP derivation (click to expand)</summary>
 
 1. **Normalization**  
-   \(s[n] = (x[n] - b)/128\), where \(b = 128\) for `uint8`, \(0\) for `int8`.
+   $s[n] = (x[n] - b)/128$, where $b = 128$ for `uint8`, $0$ for `int8`. This removes DC bias from unsigned captures and scales the lattice to a unitless, symmetric range.
 
 2. **Analytic Signal (Hilbert)**  
-   \(a[n] = s[n] + j\,\hat{s}[n]\) with \(\hat{s}[n]\) the Hilbert transform. This zeros negative frequencies, enabling single-sideband mixing.
+   $a[n] = s[n] + j\,\hat{s}[n]$ with $\hat{s}[n]$ the Hilbert transform. The quadrature pair forms a $90^{\circ}$ phase-shifted replica that zeros negative frequencies, yielding a textbook analytic signal suitable for single-sideband mixing and spectral translations.
 
 3. **Frequency Translation**  
-   Multiply by \(u[n] = e^{-j 2\pi \Delta f n / F_s^{\text{in}}}\) to rotate the spectrum by \(\Delta f\), sending \(f_t\) to baseband.
+   Multiply by $u[n] = e^{-j 2\pi \Delta f n / F_s^{\text{in}}}$ to rotate the spectrum by $\Delta f$, sending $f_t$ to baseband while preserving phase continuity chunk to chunk. This uses the discrete-time modulation property: a complex exponential multiplier shifts the spectrum without altering magnitude.
 
 4. **Decimation via Polyphase Resampling**  
    `resample_poly(y, up, down)` implements
-   \[
-   z[k] = \sum_m h[m]\, y[k \cdot \tfrac{down}{up} - m],
-   \]
-   where \(h[m]\) is a low-pass anti-imaging/anti-alias filter. We reduce `up/down` by GCD to minimize phase accumulator growth and keep \( \|h\|_1 \) stable.
+   $$
+   z[k] = \sum_m h[m]\; y[k \cdot \tfrac{down}{up} - m],
+   $$
+   where $h[m]$ is the anti-alias/anti-imaging prototype. Reducing `up/down` by gcd limits integer growth and stabilizes the effective $\ell_1$ norm of $h$. The passband retains content below $F_s^{\text{out}}/2$, and the Kaiser windowed prototype keeps sidelobes beneath the 60 dB design target, ensuring textbook bandlimiting before decimation.
 
 5. **Gain and Quantization**  
-   Let \(g = 1.05 \cdot \max_k |z[k]|\) for auto gain. The u8 mapper uses affine scaling to \([0,255]\). i8 would use symmetric clipping to \([-128,127]\).
+   Let $g = 1.05 \cdot \max_k |z[k]|$ for auto gain. The u8 mapper uses affine scaling to $[0,255]$; i8 would use symmetric clipping to $[-128, 127]$ after scaling by 127. This introduces quantization noise with a peak SNR of roughly $6.02N + 1.76$ dB for $N=8$, assuming full-scale excitation and uniform quantizer steps.
 
 6. **Metadata**  
-   Stored in `*.bin.json`: sample counts, \(\Delta f\), \(F_s^{\text{in}}\), \(F_s^{\text{out}}\), quantization mode, chunk size, and observed max magnitude.
+   Stored in `*.bin.json`: sample counts, $\Delta f$, $F_s^{\text{in}}$, $F_s^{\text{out}}$, quantization mode, chunk size, and observed max magnitude.
 
 </details>
 
@@ -167,11 +175,11 @@ runtime:
 ## 7. Extended Topics
 
 - **Reverse conversion (loss-aware)**  
-  A true inverse is impossible (bandwidth reduction + quantization), but a principled approximation would upsample complex IQ back to 26 MS/s, mix by \(-\Delta f\), and, if required, collapse to real int8 with dithering to minimize bias.
+  A true inverse is impossible (bandwidth reduction + quantization), but a principled approximation would upsample complex IQ back to 26 MS/s, mix by $-\Delta f$, and, if required, collapse to real int8 with dithering to minimize bias.
 - **Window and filter design**  
   `resample_poly` defaults to a Kaiser windowed low-pass. For sharper skirts, use a custom `window=("kaiser", beta)`; for lower latency, reduce `chunk_size` but expect more edge ripple.
 - **Phase continuity**  
-  The converter maintains an NCO phase accumulator across chunks: \(\phi_{n+1} = \phi_n + \text{phase\_step} \cdot N_{\text{chunk}}\). This prevents spectral stitching artifacts when concatenating outputs.
+  The converter maintains an NCO phase accumulator across chunks: $\phi_{n+1} = \phi_n + \text{phase\_step} \cdot N_{\text{chunk}}$. This prevents spectral stitching artifacts when concatenating outputs.
 - **Numerical stability**  
   All heavy math runs in `float32`/`complex64`, but conversion to `Fraction` for rate reduction guards against large integer accumulators and ensures bounded round-off in `up/down`.
 
@@ -190,7 +198,7 @@ runtime:
 ## 9. References and Footnotes
 
 - GPS-SDR-Receiver upstream: [`external/GPS-SDR-Receiver`](external/GPS-SDR-Receiver)
-- FFT sizing: default \(N_{\text{FFT}} = 131{,}072\) for probes, adjustable via `--fft-size`.
+- FFT sizing: default $N_{\text{FFT}} = 131{,}072$ for probes, adjustable via `--fft-size`.
 - Disk budget: complex64 interim at 26 MS/s for long captures can reach tens of GB; ensure free space ≥ 20 GB before `make convert`.
 
 [^adc]: Raw ADC dynamic range assumes 8-bit two’s complement; unsigned captures are recentred before normalization.
