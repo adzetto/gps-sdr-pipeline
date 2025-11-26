@@ -6,6 +6,12 @@
 
 This document serves as a technical article for the offline GPS spoofing-to-IQ pipeline. It highlights the mathematical signal processing steps, reproducible commands, and verification hooks that bridge raw captures to `annappo/GPS-SDR-Receiver`.
 
+**Signal integrity goals.** The pipeline is constrained by three classical DSP design targets:
+
+- **Spectral confinement:** after mixing, energy outside $[-F_s^{\text{out}}/2,\, F_s^{\text{out}}/2]$ is suppressed by the polyphase prototype with $\ge 60$ dB stopband.
+- **Quantization fidelity:** uniform scalar quantization with step $\Delta \approx 1/127.5$ yields peak SNR $\approx 6.02N + 1.76$ dB for $N=8$ bits, assuming full-scale drive; auto gain keeps the signal within this regime.
+- **Phase coherence:** continuous NCO phasing across chunks preserves $\phi_{n+1} = \phi_n + \omega_0 N_{\text{chunk}}$ (with $\omega_0 = 2\pi \Delta f / F_s^{\text{in}}$), eliminating inter-chunk discontinuities that would otherwise manifest as spectral stitching.
+
 ---
 
 ## 1. Signals, Notation, and Data Model
@@ -177,7 +183,7 @@ runtime:
 - **Window and filter design**  
   `resample_poly` defaults to a Kaiser windowed low-pass. For sharper skirts, use a custom `window=("kaiser", beta)`; for lower latency, reduce `chunk_size` but expect more edge ripple.
 - **Phase continuity**  
-  The converter maintains an NCO phase accumulator across chunks: $\phi_{n+1} = \phi_n + \text{phase\_step} \cdot N_{\text{chunk}}$. This prevents spectral stitching artifacts when concatenating outputs.
+  The converter maintains an NCO phase accumulator across chunks: $\phi_{n+1} = \phi_n + \omega_0\, N_{\text{chunk}}$, where $\omega_0 = 2\pi \Delta f / F_s^{\text{in}}$. This enforces continuity of $u[n] = e^{-j\phi_n}$ at chunk boundaries, preventing spectral stitching artifacts when concatenating outputs.
 - **Numerical stability**  
   All heavy math runs in `float32`/`complex64`, but conversion to `Fraction` for rate reduction guards against large integer accumulators and ensures bounded round-off in `up/down`.
 
